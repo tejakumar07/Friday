@@ -3,29 +3,35 @@ import { tavily } from "@tavily/core";
 import { PROMPT_TEMPLATE } from "./prompt";
 import { z } from "zod";
 import { groq } from "./lib/groq";
+import { prisma } from "./prisma/db";
+import { middleware } from "./middleware";
+import cors from "cors";
 
 const app = express();
-const port = 3000;
+const port = 3001;
 
 app.use(express.json());
+app.use(cors());
 
 const client = tavily({
   apiKey: process.env.TAVILY_API_KEY,
 });
 
-//
-// ZOD SCHEMA
-//
-
 const FollowUpSchema = z.object({
   followUpQuestions: z.array(z.string()),
 });
 
-//
-// ROUTE
-//
+// Past Conversations get
+app.get("/conversations", middleware, async (req, res) => {
+  res.json({
+    userId: req.user?.id,
+  });
+});
 
-app.post("/ask", async (req, res) => {
+// Past Conversations get
+app.post("/conversations/:conversationsId", middleware, async (req, res) => {});
+
+app.post("/ask", middleware, async (req, res) => {
   try {
     //
     // STEP 1 - GET USER QUERY
@@ -185,9 +191,12 @@ Format:
   }
 });
 
-//
-// SERVER
-//
+app.post("/ask/follow_up", middleware, async (req, res) => {
+  // Step - 1 get an existing chat from the DB.
+  // Step - 2 Forward the full history to the LLM.
+  // Step - 2.5 TODO: Do Some Context Engineering here.
+  // Step - 3 Steam the response to the user.
+});
 
 app.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
