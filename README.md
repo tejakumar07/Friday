@@ -1,1 +1,1 @@
-# Kala-AI
+# Friday
